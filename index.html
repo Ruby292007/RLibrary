@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RLibrary - Smart Campus Library Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col font-sans">
+  
+  <!-- Top Navigation Bar -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Brand / Logo -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-100">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xl font-bold tracking-tight text-slate-900 font-heading">RLibrary</span>
+              <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-700 border border-slate-200" id="portalBadge">Authentication</span>
+            </div>
+            <p class="text-xs text-slate-500 hidden sm:block">Campus Knowledge & Circulation Hub</p>
+          </div>
+        </div>
+
+        <!-- Authenticated User Controls (Visible when logged in) -->
+        <div class="flex items-center gap-2 sm:gap-4">
+          
+          <!-- User Profile Pill -->
+          <div id="headerUserProfile" class="hidden flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200">
+            <div id="headerUserAvatar" class="w-7 h-7 rounded-lg bg-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
+              U
+            </div>
+            <div class="text-left">
+              <div id="headerUserName" class="text-xs font-bold text-slate-800 leading-tight">User Name</div>
+              <div id="headerUserRoleBadge" class="text-[10px] font-semibold text-indigo-600">Role</div>
+            </div>
+          </div>
+
+          <!-- Notification Bell -->
+          <div id="headerNotifContainer" class="relative hidden">
+            <button id="notifBellBtn" class="p-2 rounded-xl text-slate-600 hover:text-indigo-600 hover:bg-slate-100 transition-colors relative" onclick="toggleNotificationDropdown()" title="Notifications & Messages">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <span id="notifBadge" class="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white rounded-full text-[10px] font-bold flex items-center justify-center animate-pulse hidden">0</span>
+            </button>
+
+            <!-- Quick Notification Dropdown -->
+            <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-slate-200 p-4 z-50">
+              <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h4 class="font-bold text-sm text-slate-800">Messages & Alerts</h4>
+                <button class="text-xs text-indigo-600 hover:underline font-semibold" onclick="markAllNotificationsRead()">Mark all read</button>
+              </div>
+              <div id="notifList" class="divide-y divide-slate-100 max-h-72 overflow-y-auto mt-2">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Sign Out Button -->
+          <button id="headerLogoutBtn" onclick="handleLogout()" class="hidden px-3 py-1.5 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 border border-slate-200 hover:border-rose-200 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5" title="Sign Out of Portal">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span class="hidden sm:inline">Sign Out</span>
+          </button>
+
+          <!-- Reset / Demo Data Seed Helper -->
+          <button onclick="resetDemoData()" title="Reset to Sample Demo Data" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors hidden sm:block">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
+
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    
+    <!-- ========================================== -->
+    <!--       AUTHENTICATION / SEPARATE LOGIN      -->
+    <!-- ========================================== -->
+    <section id="authSection" class="portal-section py-6 max-w-xl mx-auto w-full">
+      <div class="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
+        
+        <!-- Login Header Banner -->
+        <div class="bg-gradient-to-r from-indigo-700 via-indigo-600 to-violet-600 p-6 sm:p-8 text-white text-center relative overflow-hidden">
+          <div class="w-14 h-14 mx-auto rounded-2xl bg-white/15 backdrop-blur flex items-center justify-center text-white mb-3 shadow-inner">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold font-heading">RLibrary Portal</h2>
+          <p class="text-indigo-100 text-xs sm:text-sm mt-1 max-w-md mx-auto">
+            Secure, role-based access for students and library administration.
+          </p>
+
+          <!-- Role Selection Tabs -->
+          <div class="mt-6 inline-flex p-1 bg-black/20 rounded-2xl backdrop-blur border border-white/10">
+            <button id="authTabBtnStudent" onclick="switchAuthTab('STUDENT')" class="px-5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all bg-white text-indigo-700 shadow-sm flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <span>Student Sign In</span>
+            </button>
+            <button id="authTabBtnLibrarian" onclick="switchAuthTab('LIBRARIAN')" class="px-5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all text-white/80 hover:text-white flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+              <span>Librarian Portal</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="p-6 sm:p-8">
+          
+          <!-- ============================== -->
+          <!-- 1. STUDENT AUTHENTICATION      -->
+          <!-- ============================== -->
+          <div id="authStudentPanel" class="space-y-6">
+            
+            <!-- Student Sub-Tabs: Sign In vs Create Account -->
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div class="flex gap-1.5 p-1 bg-slate-100 rounded-xl">
+                <button id="btnStudentSubLogin" onclick="toggleStudentAuthMode('LOGIN')" type="button" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-indigo-700 shadow-xs">
+                  Sign In
+                </button>
+                <button id="btnStudentSubRegister" onclick="toggleStudentAuthMode('REGISTER')" type="button" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900">
+                  Create Account
+                </button>
+              </div>
+              <span class="text-xs font-medium text-slate-400">Student Access</span>
+            </div>
+
+            <!-- Mode A: Student Sign In -->
+            <div id="studentSignInBox" class="space-y-6">
+              <div class="text-left">
+                <h3 class="text-base font-bold text-slate-900">Student Account Sign In</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Sign in to check your personal borrowed books, countdown due dates, pre-order books, and review overdue fines.</p>
+              </div>
+
+              <form id="studentLoginForm" onsubmit="handleStudentLoginSubmit(event)" class="space-y-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Student Roll ID or Email</label>
+                  <input type="text" id="loginStudentIdentifier" placeholder="e.g. CS2024-001 or alex.rivera@campus.edu" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
+                </div>
+
+                <div>
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="block text-xs font-semibold text-slate-700">Password</label>
+                    <span class="text-[11px] text-slate-400">Default: student123</span>
+                  </div>
+                  <input type="password" id="loginStudentPassword" placeholder="••••••••" value="student123" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md shadow-indigo-100 flex items-center justify-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                  </svg>
+                  <span>Sign In as Student</span>
+                </button>
+              </form>
+
+              <!-- Quick Demo Student Login Profiles -->
+              <div class="pt-4 border-t border-slate-100">
+                <span class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2.5">
+                  ⚡ Instant Test Profiles (1-Click Student Login)
+                </span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" id="quickStudentLoginsContainer">
+                  <!-- Injected via JS -->
+                </div>
+              </div>
+
+              <!-- Switch to Register Link -->
+              <div class="text-center pt-2">
+                <span class="text-xs text-slate-500">New to the library? </span>
+                <button type="button" onclick="toggleStudentAuthMode('REGISTER')" class="text-xs font-bold text-indigo-600 hover:underline">
+                  Create an account now &rarr;
+                </button>
+              </div>
+
+              <!-- Privacy Notice -->
+              <div class="p-3 bg-indigo-50/60 rounded-xl border border-indigo-100 text-xs text-indigo-900 flex items-start gap-2">
+                <svg class="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <span><strong>Privacy Protection:</strong> As a student, you can only view your own records, active loans, pre-orders, and dues. Other students' records remain private.</span>
+              </div>
+            </div>
+
+            <!-- Mode B: Student Create Account / Registration -->
+            <div id="studentRegisterBox" class="space-y-5 hidden">
+              <div class="text-left">
+                <h3 class="text-base font-bold text-slate-900">Create New Student Account</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Register with your standard campus email and roll details to access borrowing privileges.</p>
+              </div>
+
+              <form id="studentRegisterForm" onsubmit="handleStudentRegisterSubmit(event)" class="space-y-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
+                  <input type="text" id="regStudentName" placeholder="e.g. Jordan Hayes" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Student / Roll ID</label>
+                    <input type="text" id="regStudentRoll" placeholder="e.g. CS2024-105" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Department</label>
+                    <select id="regStudentDept" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white" required>
+                      <option value="Computer Science">Computer Science</option>
+                      <option value="Information Technology">Information Technology</option>
+                      <option value="Artificial Intelligence">Artificial Intelligence</option>
+                      <option value="Electrical Engineering">Electrical Engineering</option>
+                      <option value="Mechanical Engineering">Mechanical Engineering</option>
+                      <option value="Mathematics">Mathematics</option>
+                      <option value="Management & Business">Management & Business</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Current Semester</label>
+                    <select id="regStudentSemester" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                      <option value="1st Semester">1st Semester</option>
+                      <option value="2nd Semester">2nd Semester</option>
+                      <option value="3rd Semester" selected>3rd Semester</option>
+                      <option value="4th Semester">4th Semester</option>
+                      <option value="5th Semester">5th Semester</option>
+                      <option value="6th Semester">6th Semester</option>
+                      <option value="7th Semester">7th Semester</option>
+                      <option value="8th Semester">8th Semester</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Phone Number</label>
+                    <input type="tel" id="regStudentPhone" placeholder="+1 (555) 000-0000" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="block text-xs font-semibold text-slate-700">Standard Student Email ID</label>
+                    <button type="button" onclick="autoFormatStandardEmail()" class="text-[11px] text-indigo-600 hover:underline font-semibold">
+                      Format as @campus.edu
+                    </button>
+                  </div>
+                  <input type="email" id="regStudentEmail" placeholder="e.g. jordan.hayes@campus.edu" pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
+                  <span class="text-[11px] text-slate-400 mt-0.5 block">Standard institutional email required (e.g., student.name@campus.edu).</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Password</label>
+                    <input type="password" id="regStudentPassword" minlength="6" placeholder="Min. 6 chars" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Confirm Password</label>
+                    <input type="password" id="regStudentConfirmPassword" minlength="6" placeholder="Repeat password" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
+                  </div>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md shadow-emerald-100 flex items-center justify-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                  </svg>
+                  <span>Create Account & Sign In</span>
+                </button>
+              </form>
+
+              <!-- Switch to Sign In Link -->
+              <div class="text-center pt-2">
+                <span class="text-xs text-slate-500">Already have an account? </span>
+                <button type="button" onclick="toggleStudentAuthMode('LOGIN')" class="text-xs font-bold text-indigo-600 hover:underline">
+                  Sign in here &rarr;
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ============================== -->
+          <!-- 2. LIBRARIAN LOGIN FORM        -->
+          <!-- ============================== -->
+          <div id="authLibrarianPanel" class="space-y-6 hidden">
+            <div class="text-left">
+              <h3 class="text-base font-bold text-slate-900">Library Staff Administration</h3>
+              <p class="text-xs text-slate-500 mt-0.5">Administrative credentials required. Librarian Rupashree manages all member records, book cataloging, pre-orders, dues settlements, and due date reminders.</p>
+            </div>
+
+            <form id="librarianLoginForm" onsubmit="handleLibrarianLoginSubmit(event)" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Librarian Email or Username</label>
+                <input type="text" id="loginLibrarianIdentifier" placeholder="e.g. rubym292007@gmail.com or rupashree" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900" required />
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-xs font-semibold text-slate-700">Administrator Password</label>
+                  <span class="text-[11px] text-slate-400">Default: admin123</span>
+                </div>
+                <input type="password" id="loginLibrarianPassword" placeholder="••••••••" value="admin123" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900" required />
+              </div>
+
+              <button type="submit" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-semibold transition-all shadow-md flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                <span>Access Librarian Console</span>
+              </button>
+            </form>
+
+            <!-- Quick Demo Librarian Login -->
+            <div class="pt-4 border-t border-slate-100">
+              <span class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2.5">
+                ⚡ Instant Test Profile (1-Click Librarian Access)
+              </span>
+              <button onclick="quickLoginLibrarian()" class="w-full p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-xl flex items-center justify-between text-left transition-all">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-lg bg-slate-900 text-white font-bold text-xs flex items-center justify-center shadow-xs">
+                    R
+                  </div>
+                  <div>
+                    <div class="font-bold text-xs text-slate-900">Rupashree</div>
+                    <div class="text-[11px] text-slate-500">Chief Librarian • rubym292007@gmail.com</div>
+                  </div>
+                </div>
+                <span class="text-xs font-semibold text-indigo-600">Login &rarr;</span>
+              </button>
+            </div>
+
+            <!-- Privileges Notice -->
+            <div class="p-3 bg-amber-50/70 rounded-xl border border-amber-200 text-xs text-amber-900 flex items-start gap-2">
+              <svg class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span><strong>Administrator Authority:</strong> Chief Librarian Rupashree has authority to view all students, modify student profiles, delete member accounts, settle dues, and dispatch due date warnings.</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!--           STUDENT PORTAL VIEW              -->
+    <!-- ========================================== -->
+    <section id="studentPortal" class="portal-section space-y-6 hidden">
+      
+      <!-- Student Banner with Quick Summary -->
+      <div class="bg-gradient-to-r from-indigo-700 via-indigo-600 to-violet-600 rounded-2xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden">
+        <div class="absolute -right-8 -bottom-8 w-56 h-56 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-indigo-100 text-xs font-semibold mb-2 backdrop-blur">
+              <span>Student ID: <span id="bannerStudentRoll">CS2024-001</span></span>
+              <span>•</span>
+              <span id="bannerStudentDept">Computer Science</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight font-heading">
+              Welcome back, <span id="bannerStudentName">Alex Rivera</span> 👋
+            </h1>
+            <p class="text-indigo-100 text-sm mt-1 max-w-xl">
+              Track borrowed books, monitor return due dates, pre-order high-demand titles, and read updates from the librarian.
+            </p>
+          </div>
+          
+          <!-- Student Quick KPI Badges -->
+          <div class="grid grid-cols-3 gap-3 sm:gap-4 bg-white/10 p-3 sm:p-4 rounded-xl backdrop-blur border border-white/15">
+            <div class="text-center">
+              <span class="block text-2xl font-bold" id="kpiBorrowedCount">0</span>
+              <span class="text-[11px] font-medium text-indigo-100 uppercase tracking-wider">Borrowed</span>
+            </div>
+            <div class="text-center border-x border-white/15 px-3">
+              <span class="block text-2xl font-bold text-amber-300" id="kpiDueSoonCount">0</span>
+              <span class="text-[11px] font-medium text-indigo-100 uppercase tracking-wider">Due Soon</span>
+            </div>
+            <div class="text-center">
+              <span class="block text-2xl font-bold text-rose-300" id="kpiStudentDues">$0.00</span>
+              <span class="text-[11px] font-medium text-indigo-100 uppercase tracking-wider">Active Dues</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Student Navigation Tabs -->
+      <div class="border-b border-slate-200">
+        <nav class="flex gap-4 sm:gap-8 overflow-x-auto pb-px" aria-label="Student Navigation">
+          <button onclick="setStudentTab('catalog')" id="sTabBtn-catalog" class="tab-btn active py-3 text-sm font-semibold border-b-2 flex items-center gap-2 whitespace-nowrap">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+            <span>Available Books & Pre-orders</span>
+          </button>
+          <button onclick="setStudentTab('loans')" id="sTabBtn-loans" class="tab-btn py-3 text-sm font-semibold border-b-2 flex items-center gap-2 whitespace-nowrap">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>My Borrowed Books & Due Dates</span>
+            <span id="tabLoanBadge" class="ml-1 px-2 py-0.5 text-xs rounded-full bg-slate-100 text-slate-700">0</span>
+          </button>
+          <button onclick="setStudentTab('preorders')" id="sTabBtn-preorders" class="tab-btn py-3 text-sm font-semibold border-b-2 flex items-center gap-2 whitespace-nowrap">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+            </svg>
+            <span>My Pre-orders</span>
+            <span id="tabPreorderBadge" class="ml-1 px-2 py-0.5 text-xs rounded-full bg-slate-100 text-slate-700">0</span>
+          </button>
+          <button onclick="setStudentTab('messages')" id="sTabBtn-messages" class="tab-btn py-3 text-sm font-semibold border-b-2 flex items-center gap-2 whitespace-nowrap">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            </svg>
+            <span>Librarian Messages & Due Alerts</span>
+            <span id="tabMessageBadge" class="ml-1 px-2 py-0.5 text-xs rounded-full bg-rose-100 text-rose-700 font-bold hidden">0</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Tab Content 1: Books Catalog -->
+      <div id="studentTab-catalog" class="student-subtab space-y-6">
+        
+        <!-- Search & Filter Controls -->
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div class="relative w-full md:w-96">
+            <svg class="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input type="text" id="bookSearchInput" placeholder="Search by title, author, or ISBN..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" oninput="filterBooks()" />
+          </div>
+
+          <div class="flex flex-wrap sm:flex-nowrap gap-3 w-full md:w-auto">
+            <!-- Category Filter -->
+            <select id="bookCategoryFilter" class="w-full sm:w-auto px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500" onchange="filterBooks()">
+              <option value="ALL">All Categories</option>
+              <option value="Computer Science">Computer Science</option>
+              <option value="Artificial Intelligence">Artificial Intelligence</option>
+              <option value="Literature & Fiction">Literature & Fiction</option>
+              <option value="Mathematics">Mathematics</option>
+              <option value="Science & Physics">Science & Physics</option>
+              <option value="Management & Business">Management & Business</option>
+            </select>
+
+            <!-- Availability Filter -->
+            <select id="bookAvailabilityFilter" class="w-full sm:w-auto px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500" onchange="filterBooks()">
+              <option value="ALL">All Statuses</option>
+              <option value="AVAILABLE">Available Now (Copies > 0)</option>
+              <option value="PREORDER">Pre-order / Reserved Out (0 Copies)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Books Grid -->
+        <div id="booksGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Empty state when no books found -->
+        <div id="noBooksFound" class="hidden text-center py-16 bg-white rounded-2xl border border-slate-200">
+          <div class="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center text-slate-400">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="text-base font-semibold text-slate-800">No books found</h3>
+          <p class="text-sm text-slate-500 mt-1">Try adjusting your search terms or category filters.</p>
+        </div>
+
+      </div>
+
+      <!-- Tab Content 2: My Borrowed Books & Due Dates -->
+      <div id="studentTab-loans" class="student-subtab hidden space-y-6">
+        
+        <!-- Due Date Alert Banner if student has urgent/overdue items -->
+        <div id="studentOverdueWarning" class="hidden p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 flex items-start gap-3">
+          <svg class="w-5 h-5 text-rose-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <div>
+            <h4 class="font-bold text-sm">Action Needed: You have overdue book(s)!</h4>
+            <p class="text-xs text-rose-700 mt-0.5">Please return your overdue books at the library desk to stop fine accumulation ($1.50/day). You can also view reminder notices in the Messages tab.</p>
+          </div>
+        </div>
+
+        <!-- Borrowed Books List -->
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
+          <div class="p-5 border-b border-slate-200 flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-bold text-slate-900">Active Loans & Due Dates</h3>
+              <p class="text-xs text-slate-500">Monitor days remaining to avoid overdue fines.</p>
+            </div>
+            <div class="text-xs text-slate-500 font-medium">
+              Fine Policy: <span class="font-semibold text-slate-700">$1.50 per day past due</span>
+            </div>
+          </div>
+
+          <div id="studentLoansContainer" class="divide-y divide-slate-100">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Borrowing History / Past Loans -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
+          <h3 class="text-base font-bold text-slate-900 mb-3">Previous Returns History</h3>
+          <div id="studentHistoryContainer" class="text-sm text-slate-500">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Tab Content 3: My Pre-orders -->
+      <div id="studentTab-preorders" class="student-subtab hidden space-y-6">
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
+            <div>
+              <h3 class="text-lg font-bold text-slate-900">Pre-ordered Books & Reservations</h3>
+              <p class="text-xs text-slate-500">When all copies are checked out, pre-ordering saves your place in line.</p>
+            </div>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+              Notification enabled for ready pickups
+            </span>
+          </div>
+
+          <div id="studentPreordersList" class="mt-4 divide-y divide-slate-100">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content 4: Messages & Due Date Reminders -->
+      <div id="studentTab-messages" class="student-subtab hidden space-y-6">
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div>
+              <h3 class="text-lg font-bold text-slate-900">Librarian Communications & Due Date Notices</h3>
+              <p class="text-xs text-slate-500">Official warnings, end-of-due-date reminders, and reservation updates.</p>
+            </div>
+            <button onclick="markAllNotificationsRead()" class="text-xs text-indigo-600 font-semibold hover:underline">
+              Mark all as read
+            </button>
+          </div>
+
+          <div id="studentMessagesFullList" class="mt-4 divide-y divide-slate-100">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!--          LIBRARIAN PORTAL VIEW             -->
+    <!-- ========================================== -->
+    <section id="librarianPortal" class="portal-section hidden space-y-6">
+      
+      <!-- Librarian Top Header Banner -->
+      <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-800 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+          <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-200 text-xs font-semibold mb-2 border border-indigo-500/30">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+              <span>Library Administrative Console • Chief Librarian Rupashree (rubym292007@gmail.com)</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight font-heading">
+              Librarian Control Dashboard
+            </h1>
+            <p class="text-slate-300 text-sm mt-1 max-w-xl">
+              Access student records, calculate dues, send due date reminders, manage pre-orders, and issue or return book loans.
+            </p>
+          </div>
+
+          <!-- Quick Actions Bar for Librarian -->
+          <div class="flex flex-wrap gap-2.5 sm:gap-3">
+            <button onclick="openIssueBookModal()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-md shadow-indigo-900/40 flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Issue New Loan</span>
+            </button>
+            <button onclick="openAddNewBookModal()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+              <span>Add Book</span>
+            </button>
+            <button onclick="triggerDueReminderBroadcast()" class="px-4 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-md shadow-rose-900/40 flex items-center gap-2" title="Send due date warnings to students approaching due dates">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <span>Broadcast Due Alerts</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Librarian KPI Statistics Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+          <div class="flex items-center justify-between text-slate-500 mb-2">
+            <span class="text-xs font-semibold uppercase">Total Titles</span>
+            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </div>
+          </div>
+          <span class="text-2xl font-bold text-slate-800" id="libKpiBooksCount">0</span>
+          <span class="text-[11px] text-slate-400 block mt-0.5" id="libKpiCopiesCount">0 physical copies</span>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+          <div class="flex items-center justify-between text-slate-500 mb-2">
+            <span class="text-xs font-semibold uppercase">Active Loans</span>
+            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+          </div>
+          <span class="text-2xl font-bold text-blue-600" id="libKpiActiveLoans">0</span>
+          <span class="text-[11px] text-slate-400 block mt-0.5">Currently issued</span>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+          <div class="flex items-center justify-between text-slate-500 mb-2">
+            <span class="text-xs font-semibold uppercase">Overdue Items</span>
+            <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+          <span class="text-2xl font-bold text-rose-600" id="libKpiOverdueCount">0</span>
+          <span class="text-[11px] text-rose-500 font-medium block mt-0.5">Past end of due date</span>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+          <div class="flex items-center justify-between text-slate-500 mb-2">
+            <span class="text-xs font-semibold uppercase">Pre-orders</span>
+            <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+              </svg>
+            </div>
+          </div>
+          <span class="text-2xl font-bold text-amber-600" id="libKpiPreordersCount">0</span>
+          <span class="text-[11px] text-slate-400 block mt-0.5">Student reservations</span>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs col-span-2 md:col-span-1">
+          <div class="flex items-center justify-between text-slate-500 mb-2">
+            <span class="text-xs font-semibold uppercase">Total Unpaid Dues</span>
+            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+          <span class="text-2xl font-bold text-emerald-600" id="libKpiTotalDues">$0.00</span>
+          <span class="text-[11px] text-slate-400 block mt-0.5">Fines across students</span>
+        </div>
+
+      </div>
+
+      <!-- Librarian Navigation Tabs -->
+      <div class="border-b border-slate-200">
+        <nav class="flex gap-4 sm:gap-8 overflow-x-auto pb-px" aria-label="Librarian Navigation">
+          <button onclick="setLibrarianTab('students')" id="lTabBtn-students" class="tab-btn active py-3 text-sm font-semibold border-b-2 flex items-center gap-2 whitespace-nowrap">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <span>Students Directory & Dues</span>
+          </button>
+          
+          <button onclick="setLibrarianTab('reminders')" id="lTabBtn-reminders" class="tab-btn py-3 text-sm font-semibold border-b-2 flex items-center gap-2 whitespace-nowrap">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            <span>Due Date Reminders & Messaging</span>
+            <span id="tabRemindersBadge" class="px-2 py-0.5 text-xs rounded-full bg-rose-100 text-rose-700 font-bold">0 Overdue</span>
+          </button>
+
+          <button onclick="setLibrarianTab('circulation')" id="lTabBtn-circulation" class="tab-btn py-3 text-sm font-semibold border-b-2 flex items-center gap-2 whitespace-nowrap">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+            </svg>
+            <span>Issue & Return Circulation Desk</span>
+          </button>
+
+          <button onclick="setLibrarianTab('preorders')" id="lTabBtn-preorders" class="tab-btn py-3 text-sm font-semibold border-b-2 flex items-center gap-2 whitespace-nowrap">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            <span>Pre-order Requests</span>
+          </button>
+
+          <button onclick="setLibrarianTab('books')" id="lTabBtn-books" class="tab-btn py-3 text-sm font-semibold border-b-2 flex items-center gap-2 whitespace-nowrap">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            <span>Book Catalog Management</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Librarian Tab 1: Students Directory & Dues -->
+      <div id="libTab-students" class="librarian-subtab space-y-6">
+        
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+          <div class="p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 class="text-lg font-bold text-slate-900">Student Directory & Account Dues</h3>
+              <p class="text-xs text-slate-500">Access student borrowing history, contact details, active loans, and fine settlements.</p>
+            </div>
+            
+            <div class="flex items-center gap-3">
+              <input type="text" id="studentSearchInput" placeholder="Search student name, roll #..." class="px-3.5 py-2 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" oninput="renderStudentsTable()" />
+              <button onclick="openAddStudentModal()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold flex items-center gap-1.5 shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+                <span>Add Student</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Students Table -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-600">
+              <thead class="bg-slate-50 text-slate-700 text-xs uppercase font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-6 py-3.5">Student Details</th>
+                  <th class="px-6 py-3.5">Department</th>
+                  <th class="px-6 py-3.5">Active Loans</th>
+                  <th class="px-6 py-3.5">Overdue Count</th>
+                  <th class="px-6 py-3.5">Outstanding Dues</th>
+                  <th class="px-6 py-3.5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="studentsTableBody" class="divide-y divide-slate-100">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Librarian Tab 2: Due Date Reminders & Messaging -->
+      <div id="libTab-reminders" class="librarian-subtab hidden space-y-6">
+        
+        <!-- Broadcast Alert Bar -->
+        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div>
+              <h4 class="font-bold text-amber-900 text-sm">Automated End-of-Due-Date Reminder System</h4>
+              <p class="text-xs text-amber-800 mt-0.5 max-w-2xl">
+                Quickly send alert notifications directly to student inboxes for books expiring in the next 3 days or already overdue.
+              </p>
+            </div>
+          </div>
+          <div class="flex gap-2.5">
+            <button onclick="triggerDueReminderBroadcast()" class="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 shadow-sm">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <span>Auto-Dispatch All Due Reminders</span>
+            </button>
+            <button onclick="openCustomMessageModal()" class="px-4 py-2.5 bg-white border border-amber-300 text-amber-900 hover:bg-amber-100 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              <span>Compose Custom Notice</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Loans Approaching Due Date Table -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+          <div class="p-5 border-b border-slate-200 flex items-center justify-between">
+            <div>
+              <h3 class="text-base font-bold text-slate-900">Loans Requiring Attention (Due in ≤ 3 Days or Overdue)</h3>
+              <p class="text-xs text-slate-500">Send personalized single reminders with one click.</p>
+            </div>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700" id="urgentLoansCountBadge">0 found</span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-600">
+              <thead class="bg-slate-50 text-slate-700 text-xs uppercase font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-6 py-3.5">Student</th>
+                  <th class="px-6 py-3.5">Book Title</th>
+                  <th class="px-6 py-3.5">Due Date</th>
+                  <th class="px-6 py-3.5">Days Status</th>
+                  <th class="px-6 py-3.5">Accrued Fine</th>
+                  <th class="px-6 py-3.5 text-right">Send Notice</th>
+                </tr>
+              </thead>
+              <tbody id="urgentLoansTableBody" class="divide-y divide-slate-100">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Sent Messages Log -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
+          <h3 class="text-base font-bold text-slate-900 mb-3">Recently Dispatched Reminders & Messages</h3>
+          <div id="librarianSentLog" class="divide-y divide-slate-100 max-h-80 overflow-y-auto">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Librarian Tab 3: Issue & Return Circulation Desk -->
+      <div id="libTab-circulation" class="librarian-subtab hidden space-y-6">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- Issue Book Form Box -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-slate-900">Issue Book to Student</h3>
+                <p class="text-xs text-slate-500">Record a new book loan and establish due date.</p>
+              </div>
+            </div>
+
+            <form id="issueBookForm" onsubmit="handleIssueBookSubmit(event)" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Select Student</label>
+                <select id="issueSelectStudent" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                  <!-- Populated by JS -->
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Select Available Book</label>
+                <select id="issueSelectBook" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                  <!-- Populated by JS -->
+                </select>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Loan Period</label>
+                  <select id="issueDuration" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="7">7 Days (Short Loan)</option>
+                    <option value="14" selected>14 Days (Standard)</option>
+                    <option value="21">21 Days (3 Weeks)</option>
+                    <option value="30">30 Days (Semester Special)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Issue Date</label>
+                  <input type="date" id="issueDateInput" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
+                </div>
+              </div>
+
+              <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md shadow-indigo-100 flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Confirm & Issue Book</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Quick Return Desk -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between">
+            <div>
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-base font-bold text-slate-900">Process Book Return</h3>
+                  <p class="text-xs text-slate-500">Check in returned books and calculate any overdue fees.</p>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Select Active Loan to Return</label>
+                <select id="returnSelectLoan" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" onchange="previewReturnLoanDetails(this.value)">
+                  <!-- Populated by JS -->
+                </select>
+              </div>
+
+              <!-- Return Preview Box -->
+              <div id="returnPreviewBox" class="hidden mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Student:</span>
+                  <span class="font-bold text-slate-800" id="retPrevStudent">-</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Book Title:</span>
+                  <span class="font-bold text-slate-800" id="retPrevBook">-</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Due Date:</span>
+                  <span class="font-semibold text-slate-700" id="retPrevDueDate">-</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Overdue Status:</span>
+                  <span class="font-bold" id="retPrevStatus">-</span>
+                </div>
+                <div class="flex justify-between border-t border-slate-200 pt-1.5">
+                  <span class="font-semibold text-slate-700">Calculated Overdue Fine:</span>
+                  <span class="font-extrabold text-sm" id="retPrevFine">$0.00</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-6">
+              <button onclick="handleProcessReturn()" id="btnProcessReturn" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md shadow-emerald-100 flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Process Return & Update Stock</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- All Active Loans Table -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+          <div class="p-5 border-b border-slate-200 flex items-center justify-between">
+            <h3 class="text-base font-bold text-slate-900">All Currently Circulating Loans</h3>
+            <span class="text-xs text-slate-500" id="totalActiveLoansCountText">0 active</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-600">
+              <thead class="bg-slate-50 text-slate-700 text-xs uppercase font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-6 py-3.5">Student</th>
+                  <th class="px-6 py-3.5">Book Title</th>
+                  <th class="px-6 py-3.5">Issued Date</th>
+                  <th class="px-6 py-3.5">Due Date</th>
+                  <th class="px-6 py-3.5">Status</th>
+                  <th class="px-6 py-3.5 text-right">Quick Action</th>
+                </tr>
+              </thead>
+              <tbody id="allLoansTableBody" class="divide-y divide-slate-100">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Librarian Tab 4: Pre-orders Requests -->
+      <div id="libTab-preorders" class="librarian-subtab hidden space-y-6">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+          <div class="p-5 border-b border-slate-200 flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-bold text-slate-900">Student Pre-orders & Reservations</h3>
+              <p class="text-xs text-slate-500">Manage queue of students awaiting checked-out or upcoming titles.</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-600">
+              <thead class="bg-slate-50 text-slate-700 text-xs uppercase font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-6 py-3.5">Student</th>
+                  <th class="px-6 py-3.5">Book Requested</th>
+                  <th class="px-6 py-3.5">Copies Available</th>
+                  <th class="px-6 py-3.5">Request Date</th>
+                  <th class="px-6 py-3.5">Status</th>
+                  <th class="px-6 py-3.5 text-right">Fulfillment</th>
+                </tr>
+              </thead>
+              <tbody id="libPreordersTableBody" class="divide-y divide-slate-100">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Librarian Tab 5: Book Catalog Management -->
+      <div id="libTab-books" class="librarian-subtab hidden space-y-6">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+          <div class="p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 class="text-lg font-bold text-slate-900">Library Book Inventory</h3>
+              <p class="text-xs text-slate-500">Add, edit, adjust copy quantities, and categorize books in the system.</p>
+            </div>
+            <button onclick="openAddNewBookModal()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Add New Book</span>
+            </button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-600">
+              <thead class="bg-slate-50 text-slate-700 text-xs uppercase font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-6 py-3.5">Book Info</th>
+                  <th class="px-6 py-3.5">Category</th>
+                  <th class="px-6 py-3.5">Shelf Location</th>
+                  <th class="px-6 py-3.5">Total Copies</th>
+                  <th class="px-6 py-3.5">Available Copies</th>
+                  <th class="px-6 py-3.5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="libBooksTableBody" class="divide-y divide-slate-100">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!--                 MODALS                     -->
+  <!-- ========================================== -->
+
+  <!-- Modal 1: Book Details & Pre-order Confirmation -->
+  <div id="bookDetailModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
+      <div class="relative p-6 sm:p-8" id="bookDetailModalContent">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Student Details & Dues Settlement (Librarian) -->
+  <div id="studentDetailModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="p-6 sm:p-8" id="studentDetailModalContent">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Compose Custom Message to Student -->
+  <div id="customMessageModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden p-6 sm:p-8">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <h3 class="text-lg font-bold text-slate-900">Send Notice to Student</h3>
+        <button onclick="closeModal('customMessageModal')" class="text-slate-400 hover:text-slate-600">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form id="customMessageForm" onsubmit="handleSendCustomMessage(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Target Recipient</label>
+          <select id="msgRecipientSelect" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="ALL">All Enrolled Students (Campus Broadcast)</option>
+            <!-- Populated with students via JS -->
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Message Template</label>
+          <select id="msgTemplateSelect" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" onchange="applyMessageTemplate(this.value)">
+            <option value="CUSTOM">Custom Message</option>
+            <option value="DUE_REMINDER">Friendly Due Date Reminder (End of loan term)</option>
+            <option value="OVERDUE_URGENT">Urgent Overdue & Fine Notice</option>
+            <option value="PREORDER_READY">Pre-order Ready for Pickup</option>
+            <option value="LIBRARY_INVENTORY">Semester Return Clearance Notice</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Subject</label>
+          <input type="text" id="msgSubjectInput" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g. Friendly Reminder: Book Due Soon" required />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Message Body</label>
+          <textarea id="msgBodyInput" rows="4" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Type your message to the student..." required></textarea>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <button type="button" onclick="closeModal('customMessageModal')" class="px-4 py-2.5 border border-slate-300 text-slate-700 rounded-xl text-sm font-semibold hover:bg-slate-50">Cancel</button>
+          <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+            <span>Send Message</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 4: Add New Book (Librarian) -->
+  <div id="addBookModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden p-6 sm:p-8">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <h3 class="text-lg font-bold text-slate-900">Add New Book to Inventory</h3>
+        <button onclick="closeModal('addBookModal')" class="text-slate-400 hover:text-slate-600">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form id="addBookForm" onsubmit="handleAddNewBook(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Book Title</label>
+          <input type="text" id="newBookTitle" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g. Designing Data-Intensive Applications" required />
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Author</label>
+            <input type="text" id="newBookAuthor" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g. Martin Kleppmann" required />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Category</label>
+            <select id="newBookCategory" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="Computer Science">Computer Science</option>
+              <option value="Artificial Intelligence">Artificial Intelligence</option>
+              <option value="Literature & Fiction">Literature & Fiction</option>
+              <option value="Mathematics">Mathematics</option>
+              <option value="Science & Physics">Science & Physics</option>
+              <option value="Management & Business">Management & Business</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Total Copies</label>
+            <input type="number" id="newBookCopies" min="1" max="50" value="3" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Shelf Code</label>
+            <input type="text" id="newBookShelf" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Rack C-12" required />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Pub. Year</label>
+            <input type="number" id="newBookYear" min="1900" max="2026" value="2024" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Description / Summary</label>
+          <textarea id="newBookDesc" rows="2" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Short description of the book..."></textarea>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <button type="button" onclick="closeModal('addBookModal')" class="px-4 py-2.5 border border-slate-300 text-slate-700 rounded-xl text-sm font-semibold hover:bg-slate-50">Cancel</button>
+          <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold">Save Book</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 5: Add New Student -->
+  <div id="addStudentModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden p-6 sm:p-8">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <h3 class="text-lg font-bold text-slate-900">Enroll New Student</h3>
+        <button onclick="closeModal('addStudentModal')" class="text-slate-400 hover:text-slate-600">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form id="addStudentForm" onsubmit="handleAddNewStudent(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
+          <input type="text" id="newStudentName" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g. Jordan Hayes" required />
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Student / Roll ID</label>
+            <input type="text" id="newStudentRoll" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="CS2024-105" required />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Department</label>
+            <input type="text" id="newStudentDept" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Computer Science" required />
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
+          <input type="email" id="newStudentEmail" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="student@campus.edu" required />
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <button type="button" onclick="closeModal('addStudentModal')" class="px-4 py-2.5 border border-slate-300 text-slate-700 rounded-xl text-sm font-semibold hover:bg-slate-50">Cancel</button>
+          <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold">Enroll Student</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 6: Edit Student Details (Librarian Only) -->
+  <div id="editStudentModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden p-6 sm:p-8">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">Edit Student Member Record</h3>
+          <p class="text-xs text-slate-500">Update academic department, contact details, or financial dues.</p>
+        </div>
+        <button onclick="closeModal('editStudentModal')" class="text-slate-400 hover:text-slate-600">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form id="editStudentForm" onsubmit="handleEditStudentSubmit(event)" class="space-y-4">
+        <input type="hidden" id="editStudentId" />
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
+            <input type="text" id="editStudentName" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Student / Roll ID</label>
+            <input type="text" id="editStudentRoll" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Department</label>
+            <input type="text" id="editStudentDept" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Semester / Year</label>
+            <input type="text" id="editStudentSemester" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
+            <input type="email" id="editStudentEmail" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Phone Number</label>
+            <input type="text" id="editStudentPhone" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Outstanding Dues / Fine Balance ($)</label>
+          <input type="number" step="0.50" min="0" id="editStudentDues" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          <span class="text-[11px] text-slate-400 mt-0.5 block">Librarians can manually adjust or waive late dues here.</span>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeModal('editStudentModal')" class="px-4 py-2.5 border border-slate-300 text-slate-700 rounded-xl text-sm font-semibold hover:bg-slate-50">Cancel</button>
+          <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span>Save Member Changes</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Scripts -->
+  <script src="app.js"></script>
+</body>
+</html>

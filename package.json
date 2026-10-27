@@ -1,0 +1,22 @@
+{
+  "name": "rlibrary",
+  "version": "1.0.0",
+  "description": "Smart Campus Library Management System with Student and Librarian Portals, Due Date Tracking, Pre-orders, and Overdue Alert Messaging.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "library",
+    "management",
+    "circulation",
+    "due-dates",
+    "preorder",
+    "roles",
+    "librarian",
+    "student"
+  ],
+  "author": "RLibrary Team",
+  "license": "MIT"
+}
